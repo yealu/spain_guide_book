@@ -239,6 +239,7 @@
   }
 
   .map-link:active { background: #F0F0F0; }
+  .map-link { touch-action: manipulation; }
 
   .map-icon {
     font-size: 20px;
@@ -1496,6 +1497,7 @@ let currentSlideIndex = 0;
 let touchStartX = 0;
 let touchStartY = 0;
 let isDragging = false;
+let touchOnLink = false;
 
 // ═══════════════════════════════════════════════
 //  렌더 헬퍼
@@ -1767,12 +1769,15 @@ function switchGroup(group) {
 }
 
 function onTouchStart(e) {
+  touchOnLink = !!e.target.closest('a');
+  if (touchOnLink) return;
   touchStartX = e.touches[0].clientX;
   touchStartY = e.touches[0].clientY;
   isDragging = false;
 }
 
 function onTouchMove(e) {
+  if (touchOnLink) return;
   const dx = e.touches[0].clientX - touchStartX;
   const dy = e.touches[0].clientY - touchStartY;
   if (!isDragging && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
@@ -1782,6 +1787,7 @@ function onTouchMove(e) {
 }
 
 function onTouchEnd(e) {
+  if (touchOnLink) { touchOnLink = false; return; }
   if (!isDragging) return;
   const dx = e.changedTouches[0].clientX - touchStartX;
   if (Math.abs(dx) > 40) {
