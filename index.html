@@ -1530,8 +1530,17 @@ function parkingDiffBadge(d) {
   return `<span class="badge ${cls}">${label}</span>`;
 }
 
+function buildMapsUrl(url, name) {
+  const match = url.match(/place_id:([^&]+)/);
+  if (match) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}&query_place_id=${match[1]}`;
+  }
+  return url;
+}
+
 function mapLinkHtml(url, name, size = 18) {
-  return `<a class="map-link" href="${url}" target="_blank" rel="noopener noreferrer">
+  const href = buildMapsUrl(url, name);
+  return `<a class="map-link" href="${href}" target="_blank" rel="noopener noreferrer">
     <span class="map-icon">🗺️</span>
     <span class="map-name" style="font-size:${size}px">${name}</span>
   </a>`;
