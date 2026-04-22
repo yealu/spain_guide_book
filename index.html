@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>신혼여행 가이드 — 바르셀로나 & 마요르카</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bcn-main: #C4724A;
+    --bcn-accent: #F0D9C8;
+    --mlc-main: #0A1628;
+    --mlc-accent: #C9A84C;
+    --bg: #FAFAF8;
+    --card-bg: #FFFFFF;
+    --text: #1A1A1A;
+    --text-sub: #6B6B6B;
+    --tab-h: 52px;
+    --dot-h: 44px;
+    --city-main: var(--bcn-main);
+    --city-accent: var(--bcn-accent);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text);
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+  }
+
+  #app {
+    max-width: 390px;
+    margin: 0 auto;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    box-shadow: 0 0 40px rgba(0,0,0,0.15);
+  }
+
+  /* ── 탭바 ── */
+  #tabbar {
+    flex-shrink: 0;
+    height: var(--tab-h);
+    padding-top: env(safe-area-inset-top);
+    display: flex;
+    background: var(--card-bg);
+    border-bottom: 1px solid #EBEBEB;
+    position: relative;
+    z-index: 10;
+  }
+
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-sub);
+    border: none;
+    background: none;
+    cursor: pointer;
+    position: relative;
+    padding: 0;
+    min-height: 44px;
+    transition: color 0.2s;
+  }
+
+  .tab-btn.active {
+    color: var(--city-main);
+  }
+
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background: var(--city-main);
+    border-radius: 2px 2px 0 0;
+  }
+
+  #tab-bcn.active { color: var(--bcn-main); }
+  #tab-bcn.active::after { background: var(--bcn-main); }
+  #tab-mlc.active { color: var(--mlc-main); }
+  #tab-mlc.active::after { background: var(--mlc-main); }
+
+  /* ── 그룹 서브탭 ── */
+  #grouptab {
+    flex-shrink: 0;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 16px;
+    gap: 6px;
+    background: var(--card-bg);
+    border-bottom: 1px solid #EBEBEB;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #grouptab::-webkit-scrollbar { display: none; }
+
+  .group-btn {
+    flex-shrink: 0;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 14px;
+    border: 1.5px solid #E0E0E0;
+    background: transparent;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-sub);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    min-width: 44px;
+  }
+
+  .group-btn.active {
+    background: var(--city-main);
+    border-color: var(--city-main);
+    color: #fff;
+  }
+
+  /* ── 슬라이드 컨테이너 ── */
+  #slide-viewport {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #slide-track {
+    display: flex;
+    height: 100%;
+    transition: transform 0.3s ease;
+    will-change: transform;
+  }
+
+  .slide {
+    flex-shrink: 0;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 20px;
+    padding-bottom: 8px;
+  }
+
+  /* ── 도트 인디케이터 ── */
+  #dotbar {
+    flex-shrink: 0;
+    height: var(--dot-h);
+    padding-bottom: env(safe-area-inset-bottom);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--card-bg);
+    border-top: 1px solid #EBEBEB;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #D0D0D0;
+    transition: all 0.2s;
+  }
+
+  .dot.active {
+    background: var(--city-main);
+    width: 18px;
+    border-radius: 3px;
+  }
+
+  /* ── 슬라이드 내부 컴포넌트 ── */
+  .slide-header {
+    margin-bottom: 12px;
+  }
+
+  .slide-day-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--city-main);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .slide-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .spot-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .spot-card:last-child { margin-bottom: 0; }
+
+  .map-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--text);
+    min-height: 44px;
+    border-radius: 8px;
+    margin: -4px;
+    padding: 4px;
+    transition: background 0.15s;
+  }
+
+  .map-link:active { background: #F0F0F0; }
+
+  .map-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    width: 28px;
+    text-align: center;
+  }
+
+  .map-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+    flex: 1;
+  }
+
+  .rating-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--text-sub);
+  }
+
+  .rating-val {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .price-row {
+    margin-top: 4px;
+    font-size: 14px;
+    color: var(--text-sub);
+  }
+
+  .info-list {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .info-item {
+    font-size: 14px;
+    color: var(--text-sub);
+    line-height: 1.5;
+  }
+
+  .info-item strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .badge-res-essential { background: #FFE8E8; color: #C0392B; }
+  .badge-res-recommended { background: #FFF3CD; color: #856404; }
+  .badge-res-none { background: #E8F5E9; color: #2E7D32; }
+
+  .badge-park-hard { background: #FFE8E8; color: #C0392B; }
+  .badge-park-mid { background: #FFF3CD; color: #856404; }
+  .badge-park-easy { background: #E8F5E9; color: #2E7D32; }
+
+  .badge-allergy-ok { background: #E8F5E9; color: #2E7D32; }
+  .badge-allergy-warn { background: #FFF3CD; color: #856404; }
+
+  .parking-card {
+    background: #F5F5F3;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .parking-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-sub);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .section-divider {
+    height: 1px;
+    background: #EBEBEB;
+    margin: 12px 0;
+  }
+
+  /* ── 개요 슬라이드 ── */
+  .overview-hero {
+    background: var(--city-main);
+    border-radius: 16px;
+    padding: 24px 20px;
+    margin-bottom: 12px;
+    color: #fff;
+  }
+
+  .overview-city {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .overview-sub {
+    font-size: 14px;
+    opacity: 0.85;
+  }
+
+  .overview-stat-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .overview-stat {
+    flex: 1;
+    background: rgba(255,255,255,0.18);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .overview-stat .val {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .overview-stat .lbl {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+
+  /* ── 식당 총정리 슬라이드 ── */
+  .rest-card {
+    background: var(--card-bg);
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .rest-day-tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--city-main);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── 새우 알러지 슬라이드 ── */
+  .allergy-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    padding: 20px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .allergy-card:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+  }
+
+  .allergy-es {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--mlc-main);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .allergy-ko {
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .allergy-phonetic {
+    font-size: 13px;
+    color: var(--text-sub);
+    font-style: italic;
+  }
+
+  .allergy-copy-hint {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--mlc-accent);
+    font-weight: 500;
+  }
+
+  /* ── 토스트 ── */
+  #toast {
+    position: fixed;
+    bottom: calc(var(--dot-h) + env(safe-area-inset-bottom) + 16px);
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(10,22,40,0.92);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+    z-index: 100;
+    max-width: calc(390px - 40px);
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── 정보 테이블 ── */
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+
+  .info-table th {
+    background: #F0F0EE;
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-sub);
+    font-size: 12px;
+  }
+
+  .info-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid #F0F0EE;
+    color: var(--text);
+    vertical-align: top;
+  }
+
+  .info-table tr:last-child td { border-bottom: none; }
+
+  .tip-card {
+    background: var(--city-accent);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .tip-card .tip-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--city-main);
+    margin-bottom: 6px;
+  }
+
+  .tip-card .tip-body {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ── 데스크탑 ── */
+  @media (min-width: 480px) {
+    body { background: #E8E8E4; }
+    #app { border-radius: 0; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- 상단 탭바 -->
+  <div id="tabbar">
+    <button class="tab-btn active" id="tab-bcn" onclick="switchCity('barcelona')">🌹 바르셀로나</button>
+    <button class="tab-btn" id="tab-mlc" onclick="switchCity('mallorca')">🌊 마요르카</button>
+  </div>
+
+  <!-- 그룹 서브탭 -->
+  <div id="grouptab"></div>
+
+  <!-- 슬라이드 뷰포트 -->
+  <div id="slide-viewport"
+    ontouchstart="onTouchStart(event)"
+    ontouchmove="onTouchMove(event)"
+    ontouchend="onTouchEnd(event)">
+    <div id="slide-track"></div>
+  </div>
+
+  <!-- 도트 인디케이터 -->
+  <div id="dotbar"></div>
+</div>
+
+<!-- 토스트 -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  데이터
+// ═══════════════════════════════════════════════
+const DATA = {
+  barcelona: {
+    cityMain: '#C4724A',
+    cityAccent: '#F0D9C8',
+    groups: ['개요', 'DAY 1', 'DAY 2', 'DAY 3', '식당 총정리', '실용정보'],
+    slides: [
+      // ── 개요 ──
+      {
+        group: '개요',
+        type: 'overview',
+        city: 'Barcelona',
+        subtitle: '2박 3일 신혼여행',
+        theme: '신혼여행 — 로맨틱 우선, 효율적 동선',
+        transport: '도보 + 지하철',
+        stats: [
+          { val: '2박 3일', lbl: '일정' },
+          { val: '13곳', lbl: '스팟' },
+          { val: '6곳', lbl: '식당' },
+        ],
+        hotel: {
+          name: 'Exe Plaza Catalunya',
+          nameNote: '(현 Dorma Plaza Catalunya)',
+          mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJd2r-m_OipBIR81OIgaU5L28',
+          rating: '4.1',
+          reviews: '994',
+          note: '카탈루냐 광장 도보 2분, 고딕 지구·그라시아 거리 도보권',
+        }
+      },
+
+      // ── DAY 1 오전 ──
+      {
+        group: 'DAY 1',
+        time: '오전',
+        title: '파크 구엘',
+        spots: [
+          {
+            name: '파크 구엘',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJq0HUUq6ipBIRWM6qGqALmok',
+            rating: '4.4',
+            reviews: '232,380',
+            fee: '€10',
+            hours: '09:30~19:30',
+            reservation: '필수',
+            tips: [
+              '사전 예매 필수 → parkguell.barcelona',
+              '08:00~09:30 이른 방문 시 인파 적고 조명 아름다움',
+              '드래곤 계단(모자이크 도마뱀) 커플 포토 추천',
+              '자연 광장 벤치에서 바르셀로나 전경 조망',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 1 점심 ──
+      {
+        group: 'DAY 1',
+        time: '점심',
+        title: 'La Pepita',
+        spots: [
+          {
+            name: 'La Pepita',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJl7hQSJSipBIRk7b0Z4WCgwE',
+            rating: '4.5',
+            reviews: '7,561',
+            price: '€€',
+            hours: '매일 13:00~01:30',
+            reservation: '권장',
+            tips: [
+              '파크 구엘 인근 타파스 바',
+              '문어·농어 타파스, 메뉴 델 디아 가성비 최고',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 1 오후 ──
+      {
+        group: 'DAY 1',
+        time: '오후',
+        title: '사그라다 파밀리아',
+        spots: [
+          {
+            name: '사그라다 파밀리아',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJk_s92NyipBIRUMnDG8Kq2Js',
+            rating: '4.8',
+            reviews: '321,069',
+            fee: '€26~€36',
+            hours: '09:00~18:00 (일 10:30~)',
+            reservation: '필수',
+            tips: [
+              '사전 예매 필수 → sagradafamilia.org',
+              '오후 2~4시 스테인드글라스 빛이 최고',
+              '가우디 무덤(지하 크립트) 관람 추천',
+            ]
+          },
+          {
+            name: '산 파우 병원 (Recinte Modernista)',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJG5nxStCipBIRnEIur1sFwFg',
+            rating: '3.8',
+            reviews: null,
+            fee: '€16',
+            hours: null,
+            reservation: null,
+            tips: [
+              '사그라다 파밀리아 도보 10분',
+              '유네스코 모더니즘 건축, 한산한 분위기',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 1 저녁 ──
+      {
+        group: 'DAY 1',
+        time: '저녁',
+        title: '저녁 & 야간 까사 바트요',
+        spots: [
+          {
+            name: 'Cervecería Catalana',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ14DbPpKipBIROjfbj6-0FW0',
+            rating: '4.4',
+            reviews: '23,984',
+            price: '€€',
+            hours: '매일 09:00~01:00',
+            reservation: '권장',
+            tips: [
+              '한국 여행자 강력 추천 타파스 맛집',
+              '핀초스·꿀대구·감바스 알 아히요',
+              '저녁 7시 전 도착 또는 예약 권장',
+            ]
+          },
+          {
+            name: '까사 바트요 (야간)',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJYUFLSe2ipBIRD04uni940kA',
+            rating: '4.7',
+            reviews: '202,990',
+            fee: '€55~ (Magic Night)',
+            hours: '08:30~22:30',
+            reservation: '권장',
+            tips: [
+              'Magic Night 야간 투어 € 55~ — 사전 예약 권장',
+              '외관 무료 감상도 가능',
+              '그라시아 거리 "불화의 블록" 함께 감상',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 2 오전 ──
+      {
+        group: 'DAY 2',
+        time: '오전',
+        title: '고딕 지구 탐방',
+        spots: [
+          {
+            name: '바르셀로나 대성당',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJg2xxlvmipBIRg1jhdSQR9hY',
+            rating: '4.6',
+            reviews: '82,026',
+            fee: '무료 (특정 시간)',
+            hours: '09:30~17:45 (일 14:00~)',
+            reservation: null,
+            tips: [
+              '이른 오전 방문 권장',
+              '회랑 정원 필수',
+            ]
+          },
+          {
+            name: '레이알 광장',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJJ86B5VeipBIRZnGoGQns3JA',
+            rating: null,
+            reviews: null,
+            fee: '무료',
+            hours: '24시간',
+            reservation: null,
+            tips: ['가우디 디자인 가로등', '야외 카페 밀집']
+          },
+          {
+            name: '산트 필리프 네리 광장',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJuX570vmipBIR-rPtSmhrvdc',
+            rating: null,
+            reviews: null,
+            fee: '무료',
+            hours: '24시간',
+            reservation: null,
+            tips: ['바르셀로나에서 가장 조용하고 아름다운 숨은 광장']
+          },
+          {
+            name: '람블라스 거리',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJyRQXCFiipBIRxL1CiKz3viQ',
+            rating: '4.4',
+            reviews: '9,177',
+            fee: '무료',
+            hours: '24시간',
+            reservation: null,
+            tips: ['⚠️ 소매치기 주의 — 가방은 앞에 메기', '구경 위주 권장']
+          }
+        ]
+      },
+
+      // ── DAY 2 점심 ──
+      {
+        group: 'DAY 2',
+        time: '점심',
+        title: '보케리아 & Les Quinze Nits',
+        spots: [
+          {
+            name: '보케리아 시장',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJAVoetfeipBIR1a1z3FTGCoY',
+            rating: '4.5',
+            reviews: '209,513',
+            fee: '무료',
+            hours: '월~토 08:00~20:30',
+            reservation: null,
+            tips: ['관광지 가격 높음 — 구경 위주 권장']
+          },
+          {
+            name: 'Les Quinze Nits',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJDbHO_FeipBIRnbmunU3-ELA',
+            rating: '4.2',
+            reviews: '12,569',
+            price: '€€',
+            hours: '매일 09:00~24:00',
+            reservation: '불필요',
+            tips: ['한국인 입맛에 맞는 빠에야, 아로스 네그로', '레이알 광장 내 위치']
+          }
+        ]
+      },
+
+      // ── DAY 2 오후 ──
+      {
+        group: 'DAY 2',
+        time: '오후',
+        title: '바르셀로네타 해변',
+        spots: [
+          {
+            name: '바르셀로네타 해변',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJJ5Y4CaijpBIR-2VJP9cOjh4',
+            rating: '4.4',
+            reviews: '15,158',
+            fee: '무료',
+            hours: '24시간',
+            reservation: null,
+            tips: [
+              '람블라스 거리 끝에서 도보 10~15분',
+              '4월 수온 약 16~18℃ — 수영보다 산책·일몰 추천',
+              '해변 바에서 상그리아 추천',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 2 이른 저녁 ──
+      {
+        group: 'DAY 2',
+        time: '이른 저녁',
+        title: '카르멜 벙커 일몰',
+        spots: [
+          {
+            name: '카르멜 벙커 (MUHBA Turó de la Rovira)',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJUcV95LSipBIRUBkO4FCGMRU',
+            rating: '4.6',
+            reviews: '17,467',
+            fee: '무료',
+            hours: '금~일 10:00~15:00',
+            reservation: null,
+            tips: [
+              '4월 말 일몰 약 20:45 → 19:30~20:00 도착 권장',
+              '택시 또는 V17 버스 이용',
+              '바르셀로나 360도 파노라마 뷰',
+              '음료·스낵 지참 — 신혼 일몰 피크닉 포인트',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 2 저녁 ──
+      {
+        group: 'DAY 2',
+        time: '저녁',
+        title: 'El Xampanyet',
+        spots: [
+          {
+            name: 'El Xampanyet',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJR9uyi_6ipBIRuK0SZscDB3w',
+            rating: '4.7',
+            reviews: '6,237',
+            price: '€~€€',
+            hours: '화~금 12:00~15:30, 19:00~23:00 / 토 12:00~15:30 / 월·일 휴무',
+            reservation: '불필요',
+            tips: [
+              '1929년 창업 클래식 카탈루냐 타파스 바',
+              '카바(스파클링 와인) 전문',
+              'El Born 골목 위치 — 웨이팅 자체가 경험',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 3 오전 ──
+      {
+        group: 'DAY 3',
+        time: '오전',
+        title: '그라시아 거리 & 라 페드레라',
+        spots: [
+          {
+            name: '라 페드레라 (Casa Milà)',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ1eGKmZOipBIRah43T2Kjn8Q',
+            rating: '4.6',
+            reviews: '109,902',
+            fee: '€25~',
+            hours: '09:00~23:00',
+            reservation: '권장',
+            tips: [
+              '가우디 마지막 민간 건축',
+              '옥상 테라스에서 바르셀로나 전경 필수',
+              '까사 바트요·까사 아마트예르·까사 예오 모레라 "불화의 블록" 외관 무료 감상',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 3 점심 ──
+      {
+        group: 'DAY 3',
+        time: '점심',
+        title: 'Bo et Mie',
+        spots: [
+          {
+            name: 'Boulangerie Bo et Mie',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJv2VO4BejpBIRAQlB0jVWCBk',
+            rating: '4.4',
+            reviews: '2,519',
+            price: '€~€€',
+            hours: '매일 07:00~21:00',
+            reservation: '불필요',
+            tips: [
+              '프렌치 스타일 베이커리·브런치',
+              '크루아상·에그 베네딕트 커플 브런치',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 3 오후 ──
+      {
+        group: 'DAY 3',
+        time: '오후',
+        title: '자유 시간',
+        spots: [
+          {
+            name: '시우타데야 공원',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ4QmWQ_2ipBIRcD1a5hhhOEI',
+            rating: '4.6',
+            reviews: '76,926',
+            fee: '무료',
+            hours: '24시간',
+            reservation: null,
+            tips: [
+              '호수 로잉 보트 대여 €6/30분',
+              '신혼 피크닉 추천',
+            ]
+          },
+          {
+            name: 'DeLaCrem (젤라또)',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ3TMuUYyipBIRr5QWiKg3WQA',
+            rating: '4.6',
+            reviews: '8,010',
+            price: '€',
+            hours: '월~금 09:30~00:30, 주말 10:00~',
+            reservation: null,
+            tips: [
+              '바르셀로나 최고 젤라또',
+              '패션프루트·피스타치오 강력 추천',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 3 저녁 ──
+      {
+        group: 'DAY 3',
+        time: '저녁',
+        title: '특별 만찬',
+        spots: [
+          {
+            name: 'Tickets (미슐랭)',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ69NAjGSipBIRdoXVW4t6F24',
+            rating: '4.5',
+            reviews: '1,815',
+            price: '€€€€',
+            hours: null,
+            reservation: '필수',
+            tips: [
+              '알베르트 아드리아 미슐랭 스타 레스토랑',
+              '전위적 카탈루냐 타파스 파인다이닝',
+              '2개월 전 예약 필수 / 1인 €80~€120',
+            ]
+          },
+          {
+            name: 'La Cova Fumada (가성비 대안)',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJvdFY9amjpBIRVecxFX2krK0',
+            rating: '4.6',
+            reviews: '5,537',
+            price: '€€',
+            hours: '월~금 09:00~15:00, 토 09:00~14:00 / 일 휴무',
+            reservation: null,
+            tips: [
+              '봄바(Bomba) 발상지 — 현지인 분위기',
+              '정오 전 도착 권장 (웨이팅 긺)',
+            ]
+          }
+        ]
+      },
+
+      // ── 식당 총정리 ──
+      {
+        group: '식당 총정리',
+        type: 'restaurant-summary',
+        restaurants: [
+          { day: 'DAY 1 점심', name: 'La Pepita', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJl7hQSJSipBIRk7b0Z4WCgwE', rating: '4.5', reviews: '7,561', price: '€€', reservation: '권장' },
+          { day: 'DAY 1 저녁', name: 'Cervecería Catalana', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ14DbPpKipBIROjfbj6-0FW0', rating: '4.4', reviews: '23,984', price: '€€', reservation: '권장' },
+          { day: 'DAY 2 점심', name: 'Les Quinze Nits', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJDbHO_FeipBIRnbmunU3-ELA', rating: '4.2', reviews: '12,569', price: '€€', reservation: '불필요' },
+          { day: 'DAY 2 저녁', name: 'El Xampanyet', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJR9uyi_6ipBIRuK0SZscDB3w', rating: '4.7', reviews: '6,237', price: '€~€€', reservation: '불필요' },
+          { day: 'DAY 3 점심', name: 'Bo et Mie', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJv2VO4BejpBIRAQlB0jVWCBk', rating: '4.4', reviews: '2,519', price: '€~€€', reservation: '불필요' },
+          { day: 'DAY 3 저녁', name: 'Tickets', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ69NAjGSipBIRdoXVW4t6F24', rating: '4.5', reviews: '1,815', price: '€€€€', reservation: '필수 (2개월 전)' },
+        ]
+      },
+
+      // ── 실용정보 — 교통 ──
+      {
+        group: '실용정보',
+        type: 'info',
+        title: '교통 & 예매',
+        sections: [
+          {
+            heading: '✈️ 공항 교통',
+            rows: [
+              ['Aerobús (공항버스)', '약 35분', '€6.75 편도'],
+              ['지하철 L9 (환승 필요)', '—', '€5.15'],
+              ['택시', '—', '€35~€45'],
+            ],
+            cols: ['수단', '시간', '요금'],
+          },
+          {
+            heading: '🚇 시내 교통 카드',
+            rows: [
+              ['Hola BCN 2일', '지하철·버스·트램 무제한', '€17.50'],
+              ['Hola BCN 3일', '지하철·버스·트램 무제한', '€25.50'],
+              ['T-Casual 10회권', '단거리 여행자 적합', '€12.55'],
+            ],
+            cols: ['카드', '내용', '요금'],
+          },
+          {
+            heading: '📅 예매 타이밍',
+            rows: [
+              ['2개월 전', '사그라다 파밀리아, 파크 구엘, Tickets'],
+              ['1개월 전', '까사 바트요 Magic Night'],
+              ['2주 전', '라 페드레라, 커플 스냅 투어'],
+            ],
+            cols: ['시기', '항목'],
+          },
+        ]
+      },
+
+      // ── 실용정보 — 팁 ──
+      {
+        group: '실용정보',
+        type: 'tips',
+        title: '여행 팁',
+        tips: [
+          { title: '⚠️ 소매치기 주의', body: '람블라스 거리·보케리아 시장·지하철 내 빈번. 가방은 앞에 메고 귀중품은 숙소 금고 보관.' },
+          { title: '🍽️ 식사 문화', body: '점심: 14:00~16:00가 스페인 메인 식사 시간. 저녁: 현지인은 21:00 이후. 메뉴 델 디아(점심 코스) €12~€20 가성비 최고.' },
+          { title: '🌤️ 4월 날씨', body: '낮 15~22℃ / 밤 10~14℃. 가벼운 겉옷 + 접이식 우산 필수.' },
+          { title: '💑 신혼 특별 추천', body: '커플 스냅 투어 €150~250 / 까사 바트요 Magic Night €55~ / Tickets 만찬 €80~120/인 / 항구 크루즈 €30~60/인.' },
+        ]
+      },
+    ]
+  },
+
+  mallorca: {
+    cityMain: '#0A1628',
+    cityAccent: '#C9A84C',
+    groups: ['개요', 'DAY 1', 'DAY 2', 'DAY 3', '식당 총정리', '실용정보'],
+    slides: [
+      // ── 개요 ──
+      {
+        group: '개요',
+        type: 'overview',
+        city: 'Mallorca',
+        subtitle: '2박 3일 신혼여행',
+        theme: '트라문타나 산악 마을 → 지중해 코브 → 팔마 미식',
+        transport: '렌터카 전일정 자가 운전',
+        stats: [
+          { val: '2박 3일', lbl: '일정' },
+          { val: '7곳', lbl: '스팟' },
+          { val: '6곳', lbl: '식당' },
+        ],
+        hotels: [
+          {
+            name: 'Alqueria Blanca',
+            nameNote: '(1·2박)',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJs6Jrcj3slxIRBod2kB9dgVk',
+            rating: '4.7',
+            reviews: '231',
+            note: '무어 농가 개조, 무료 주차, 수영장, 조식 포함',
+          },
+          {
+            name: 'Es Figueral Nou',
+            nameNote: '(3박)',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ71_vh1-3lxIRV2zi3jVMgAg',
+            rating: '4.7',
+            reviews: '191',
+            note: '18세기 핀카, 스파, 미슐랭 셰프 레스토랑, 무료 주차',
+          }
+        ]
+      },
+
+      // ── DAY 1 오전 ──
+      {
+        group: 'DAY 1',
+        time: '오전',
+        title: '소예르 & 포르트 데 소예르',
+        spots: [
+          {
+            name: '소예르 광장 (Plaça d\'Espanya)',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJkWqJbr_olxIRK6ZCX3yUwMY',
+            rating: '4.6',
+            reviews: '65',
+            reservation: null,
+            tips: ['숙소에서 차로 15분 (MA-11)'],
+            parking: { name: '광장 인근 유료 주차', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJkWqJbr_olxIRK6ZCX3yUwMY', fee: '유료', difficulty: '보통' }
+          },
+          {
+            name: '소예르 트램역',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ00YRZIXplxIR31esdowLjjM',
+            rating: '4.3',
+            reviews: '696',
+            reservation: null,
+            tips: ['트램 €8 왕복, 15분', '빈티지 트램 탑승 자체가 명물'],
+          },
+          {
+            name: '포르트 데 소예르 항구',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJcUwUE-PllxIR7EfPQaD6UWw',
+            rating: '4.5',
+            reviews: '656',
+            reservation: null,
+            tips: ['에메랄드빛 항구 커플 산책', '감귤 소품 쇼핑'],
+          }
+        ]
+      },
+
+      // ── DAY 1 점심 ──
+      {
+        group: 'DAY 1',
+        time: '점심',
+        title: 'Espiritu Libre',
+        spots: [
+          {
+            name: 'Espiritu Libre',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJK9tkV2PllxIRjyvnfdcaEkE',
+            rating: '4.9',
+            reviews: '866',
+            price: '€€',
+            hours: '월·금~일 13:00~14:30, 18:30~21:00 / 화·수 휴무',
+            reservation: '권장',
+            allergyBadge: '고지필요',
+            tips: [
+              '포르트 데 소예르 구글 평점 1위',
+              '환영 음료 제공, 채소·생선 위주 가정식',
+              '⚠️ 태국 커리에 새우 포함 가능 — 예약 시 알러지 고지',
+              '화·수 방문 시 → Goia (아래) 이용',
+            ]
+          },
+          {
+            name: 'Goia (화·수 대안)',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJd6DV0eDllxIRbwNbEj_PpOE',
+            rating: '4.9',
+            reviews: '442',
+            price: '€€€',
+            hours: '매일 13:00~21:00',
+            reservation: '권장',
+            allergyBadge: '고지필요',
+            tips: ['항구뷰 테라스', '와규 스테이크·농어'],
+          }
+        ]
+      },
+
+      // ── DAY 1 오후 ──
+      {
+        group: 'DAY 1',
+        time: '오후',
+        title: '데이아 마을',
+        spots: [
+          {
+            name: '데이아 마을',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJc1QMHLPvlxIR4tTUbbPZf_k',
+            rating: null,
+            reviews: null,
+            reservation: null,
+            tips: [
+              '소예르에서 차로 20분 (MA-10 절벽 도로)',
+              '⚠️ 09:00 전 도착 필수 — 외곽 노상 주차, 유턴 불가',
+            ],
+            parking: { name: '마을 외곽 노상', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJc1QMHLPvlxIR4tTUbbPZf_k', fee: '무료', difficulty: '매우 어려움' }
+          },
+          {
+            name: '로버트 그레이브스 박물관',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJM5gtg7HvlxIRQbtKkW3ukHw',
+            rating: '4.5',
+            reviews: '214',
+            tips: ['도보 5분'],
+          },
+          {
+            name: '칼라 데이아 (Cala Deià)',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ75UrJ7nvlxIRZ8rbuFrdatY',
+            rating: '4.2',
+            reviews: '5,202',
+            tips: ['도보 20분', '스노클링 명소'],
+          }
+        ]
+      },
+
+      // ── DAY 1 저녁 ──
+      {
+        group: 'DAY 1',
+        time: '저녁',
+        title: 'Groenk Bistro & Grill',
+        spots: [
+          {
+            name: 'Groenk Bistro & Grill Deià',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJeQTmlB3vlxIRtgG29579F6Y',
+            rating: '4.8',
+            reviews: '769',
+            price: '€€€',
+            hours: '매일 10:00~22:00',
+            reservation: '권장',
+            allergyBadge: '최적',
+            tips: [
+              '갈리시아산 리브아이·T본·이베리코 슈니첼·수제 버거',
+              '숯불 참나무 그릴',
+              '✅ 새우 알러지 최적 — 육류·생선 그릴 중심, 교차 오염 낮음',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 2 오전 ──
+      {
+        group: 'DAY 2',
+        time: '오전',
+        title: '발데모사',
+        spots: [
+          {
+            name: '발데모사 마을',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ_8aKugPulxIRPhKWi-dSSJI',
+            rating: null,
+            reviews: null,
+            reservation: null,
+            tips: ['숙소에서 차로 15분 (MA-11 → MA-1110)', '09:00 전 도착 권장'],
+            parking: { name: '방문자센터 인근 유료', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ_8aKugPulxIRPhKWi-dSSJI', fee: '유료, 도보 3~5분', difficulty: '보통' }
+          },
+          {
+            name: '카르투시오 수도원',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJEZNqYQHulxIRrKGEJCErWFo',
+            rating: '4.4',
+            reviews: '4,499',
+            fee: '€11',
+            hours: '월~토 10:00~17:00',
+            tips: ['쇼팽·조르주 상드 체류 수도원', '쇼팽 피아노 전시'],
+          }
+        ]
+      },
+
+      // ── DAY 2 점심 ──
+      {
+        group: 'DAY 2',
+        time: '점심',
+        title: 'Es Taller Valldemossa',
+        spots: [
+          {
+            name: 'Es Taller Valldemossa',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ6Q_LeTvvlxIR4tj_tdM7lKs',
+            rating: '4.7',
+            reviews: '2,685',
+            price: '€€€',
+            hours: '화~일 13:00~16:00, 19:00~22:00 / 월 휴무',
+            reservation: '필수',
+            allergyBadge: '고지필요',
+            tips: [
+              '정비소 개조 콘셉트, 현지 계절 퓨전 타파스',
+              '⚠️ 새우 타파스 있음 — 예약 시 알러지 반드시 고지',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 2 오후 ──
+      {
+        group: 'DAY 2',
+        time: '오후',
+        title: 'Sa Foradada 드라이브',
+        spots: [
+          {
+            name: 'Mirador de Sa Foradada',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ2Q9fvhPvlxIRhv5nzZJ6nJM',
+            rating: '4.6',
+            reviews: '1,201',
+            tips: [
+              '바위 중앙 구멍 뚫린 반도 지형',
+              'Son Marroig 카페에서 절벽뷰 칵테일 추천',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 2 저녁 ──
+      {
+        group: 'DAY 2',
+        time: '저녁',
+        title: 'Kingfisher Restaurant',
+        spots: [
+          {
+            name: 'Kingfisher Restaurant',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJhdObgeTllxIRIG959ovrUZs',
+            rating: '4.7',
+            reviews: '1,225',
+            price: '€€€',
+            hours: '화~토 12:15~15:30, 18:30~21:15 / 월·일 휴무',
+            reservation: '필수',
+            allergyBadge: '최적',
+            tips: [
+              '농어 필레 €28 / 대구 피시앤칩스 €26 / 갈비 BBQ €32',
+              '✅ 새우 알러지 대응 — 예약 시 고지',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 3 이른 아침 ──
+      {
+        group: 'DAY 3',
+        time: '이른 아침',
+        title: '칼로 데스 모로',
+        spots: [
+          {
+            name: '칼로 데스 모로',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJI1J5hBhVlhIRp9hdEN6Mb70',
+            rating: '4.6',
+            reviews: '8,952',
+            reservation: null,
+            tips: [
+              '07:30 출발 — Alqueria Blanca에서 차로 1시간 (MA-19)',
+              '⚠️ 08:00 전 주차 필수 — 노란 선 절대 금지 (견인)',
+              '주차 후 도보 20~25분 (트레킹화 착용, 슬리퍼 금지)',
+              '물 1L + 간식 지참 (편의시설 없음)',
+              '부풀린 튜브·대형 짐 금지',
+            ],
+            parking: { name: 'Cala Llombards 무료 주차', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJuX0cJwdVlhIR3OCx891WTr0', fee: '무료, 도보 20~25분', difficulty: '매우 어려움' }
+          }
+        ]
+      },
+
+      // ── DAY 3 점심 ──
+      {
+        group: 'DAY 3',
+        time: '점심',
+        title: 'Restaurant Anoa Santanyí',
+        spots: [
+          {
+            name: '산타니 마을',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJeb49jYRUlhIRjo0rNf18N1c',
+            rating: null,
+            reviews: null,
+            tips: ['칼로 데스 모로에서 차로 15분'],
+          },
+          {
+            name: 'Restaurant Anoa Santanyí',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJHaMik5pUlhIRHvMaplGycv8',
+            rating: '4.7',
+            reviews: '643',
+            price: '€€',
+            hours: '수·토 11:00~15:00 / 월·화 휴무',
+            reservation: '권장',
+            allergyBadge: '최적',
+            tips: [
+              '산타니 마을 코트야드 정원',
+              '✅ 채소·육류 옵션 다양 — 새우 알러지 안전',
+              '현지 와인 추천',
+            ]
+          }
+        ]
+      },
+
+      // ── DAY 3 오후 ──
+      {
+        group: 'DAY 3',
+        time: '오후',
+        title: '팔마',
+        spots: [
+          {
+            name: '산타 카탈리나 시장',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJvXCh7GeSlxIRg6SZs6guDy0',
+            rating: '4.4',
+            reviews: '5,483',
+            hours: '월~토 07:00~15:00',
+            fee: '무료 입장',
+            tips: ['시장 전용 주차 없음'],
+            parking: { name: 'Parc Sa Feixina', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJL4fNsEKSlxIRm_rKnSWKk1U', fee: '유료, 도보 8~10분', difficulty: '보통' }
+          },
+          {
+            name: '팔마 대성당 (La Seu)',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJVY-vfUWSlxIRqoH9muibDFQ',
+            rating: '4.7',
+            reviews: '63,610',
+            fee: '€10',
+            hours: '월~금 10:00~17:15',
+            tips: ['가우디 개조 내부 인테리어'],
+            parking: { name: 'Aparcament Parc de la Mar', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJH3Zl_EWSlxIRGX8kYezF7LU', fee: '€2/시간, 도보 2분', difficulty: '쉬움' }
+          }
+        ]
+      },
+
+      // ── DAY 3 저녁 ──
+      {
+        group: 'DAY 3',
+        time: '저녁',
+        title: 'Es Pati de Montuïri',
+        spots: [
+          {
+            name: 'Es Pati de Montuïri',
+            mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ1ZeMhxu3lxIRZ4W0WZNwnMc',
+            rating: '4.8',
+            reviews: '149',
+            price: '€€€€',
+            hours: '매일 19:00~24:00 / 토·일 점심 13:00~15:30',
+            reservation: '필수',
+            allergyBadge: '최적',
+            tips: [
+              'Es Figueral Nou 체크인 후 숙소 레스토랑',
+              '미슐랭 셰프 산티 타우라 — 스페인 전국 68위',
+              '8코스 테이스팅 or 아 라 카르테',
+              '✅ 예약 시 알러지 고지 → 코스 조율 가능',
+            ]
+          }
+        ]
+      },
+
+      // ── 식당 총정리 ──
+      {
+        group: '식당 총정리',
+        type: 'restaurant-summary',
+        restaurants: [
+          { day: 'DAY 1 점심', name: 'Espiritu Libre', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJK9tkV2PllxIRjyvnfdcaEkE', rating: '4.9', reviews: '866', price: '€€', allergyBadge: '고지필요', reservation: '권장' },
+          { day: 'DAY 1 저녁', name: 'Groenk Bistro & Grill', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJeQTmlB3vlxIRtgG29579F6Y', rating: '4.8', reviews: '769', price: '€€€', allergyBadge: '최적', reservation: '권장' },
+          { day: 'DAY 2 점심', name: 'Es Taller Valldemossa', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ6Q_LeTvvlxIR4tj_tdM7lKs', rating: '4.7', reviews: '2,685', price: '€€€', allergyBadge: '고지필요', reservation: '필수' },
+          { day: 'DAY 2 저녁', name: 'Kingfisher Restaurant', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJhdObgeTllxIRIG959ovrUZs', rating: '4.7', reviews: '1,225', price: '€€€', allergyBadge: '최적', reservation: '필수' },
+          { day: 'DAY 3 점심', name: 'Restaurant Anoa Santanyí', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJHaMik5pUlhIRHvMaplGycv8', rating: '4.7', reviews: '643', price: '€€', allergyBadge: '최적', reservation: '권장' },
+          { day: 'DAY 3 저녁', name: 'Es Pati de Montuïri', mapUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ1ZeMhxu3lxIRZ4W0WZNwnMc', rating: '4.8', reviews: '149', price: '€€€€', allergyBadge: '최적', reservation: '필수' },
+        ]
+      },
+
+      // ── 실용정보 — 주차 & 드라이브 ──
+      {
+        group: '실용정보',
+        type: 'info',
+        title: '주차 & 드라이브',
+        sections: [
+          {
+            heading: '🅿️ 주차 법칙',
+            rows: [
+              ['🟡 노란 선', '절대 금지 — 즉시 견인'],
+              ['🔵 파란 선', '유료 노상 (동전·앱)'],
+              ['⬜ 흰 선', '무료 노상 (시간 제한 확인)'],
+            ],
+            cols: ['색상', '의미'],
+          },
+          {
+            heading: '🚗 구간별 드라이브',
+            rows: [
+              ['팔마 공항 → Alqueria Blanca', '25km / 30분', 'MA-11'],
+              ['Alqueria → 소예르', '12km / 15분', 'MA-11, 터널 €5'],
+              ['소예르 → 데이아', '10km / 20분', 'MA-10 ⚠️ 절벽'],
+              ['Alqueria → 발데모사', '13km / 15분', 'MA-11→MA-1110'],
+              ['Alqueria → 칼로 데스 모로', '68km / 1시간', 'MA-19 ✅ 고속'],
+              ['산타니 → 팔마', '55km / 40분', 'MA-19 ✅ 고속'],
+              ['팔마 → Es Figueral Nou', '35km / 30분', 'MA-15 ✅ 편안'],
+            ],
+            cols: ['구간', '거리/시간', '도로'],
+          },
+        ]
+      },
+
+      // ── 실용정보 — 새우 알러지 ──
+      {
+        group: '실용정보',
+        type: 'allergy',
+        title: '🦐 새우 알러지 대응',
+        phrases: [
+          {
+            es: 'Tengo alergia a las gambas.',
+            ko: '저는 새우 알레르기가 있어요.',
+            phonetic: '뗑고 알레르히아 아 라스 감바스',
+          },
+          {
+            es: '¿Tiene gambas?',
+            ko: '새우가 들어 있나요?',
+            phonetic: '띠에네 감바스',
+          },
+          {
+            es: 'Sin gambas, por favor.',
+            ko: '새우는 빼주세요.',
+            phonetic: '씬 감바스, 뽀르 파보르',
+          },
+        ]
+      },
+    ]
+  }
+};
+
+// ═══════════════════════════════════════════════
+//  상태
+// ═══════════════════════════════════════════════
+let currentCity = 'barcelona';
+let currentGroup = '개요';
+let currentSlideIndex = 0;
+
+let touchStartX = 0;
+let touchStartY = 0;
+let isDragging = false;
+
+// ═══════════════════════════════════════════════
+//  렌더 헬퍼
+// ═══════════════════════════════════════════════
+function resBadgeHtml(res) {
+  if (!res) return '';
+  const map = {
+    '필수': ['badge-res-essential', '🔴 예약 필수'],
+    '필수 (2개월 전)': ['badge-res-essential', '🔴 2개월 전 예약 필수'],
+    '권장': ['badge-res-recommended', '🟡 예약 권장'],
+    '불필요': ['badge-res-none', '✅ 예약 불필요'],
+  };
+  const [cls, label] = map[res] || ['badge-res-recommended', res];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function allergyBadgeHtml(badge) {
+  if (!badge) return '';
+  if (badge === '최적') return `<span class="badge badge-allergy-ok">✅ 새우 알러지 최적</span>`;
+  return `<span class="badge badge-allergy-warn">⚠️ 알러지 고지 필요</span>`;
+}
+
+function parkingDiffBadge(d) {
+  const map = {
+    '매우 어려움': ['badge-park-hard', '🔴 주차 매우 어려움'],
+    '보통': ['badge-park-mid', '⚠️ 주차 보통'],
+    '쉬움': ['badge-park-easy', '✅ 주차 쉬움'],
+  };
+  const [cls, label] = map[d] || ['badge-park-mid', d];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function mapLinkHtml(url, name, size = 18) {
+  return `<a class="map-link" href="${url}" target="_blank" rel="noopener noreferrer">
+    <span class="map-icon">🗺️</span>
+    <span class="map-name" style="font-size:${size}px">${name}</span>
+  </a>`;
+}
+
+function spotCardHtml(spot, isMallorca) {
+  const ratingHtml = spot.rating
+    ? `<div class="rating-row">⭐ <span class="rating-val">${spot.rating}</span>${spot.reviews ? ` <span>(${spot.reviews}건)</span>` : ''}</div>`
+    : '';
+  const priceHtml = spot.price ? `<div class="price-row">💰 가격대: ${spot.price}</div>` : '';
+  const feeHtml = spot.fee ? `<div class="info-item">🎟️ <strong>입장료:</strong> ${spot.fee}</div>` : '';
+  const hoursHtml = spot.hours ? `<div class="info-item">🕐 <strong>영업:</strong> ${spot.hours}</div>` : '';
+  const tipsHtml = (spot.tips || []).map(t => `<div class="info-item">• ${t}</div>`).join('');
+  const badgesHtml = [
+    resBadgeHtml(spot.reservation),
+    isMallorca ? allergyBadgeHtml(spot.allergyBadge) : '',
+  ].join('');
+  const parkingHtml = spot.parking ? `
+    <div class="parking-card">
+      <div class="parking-title">주차 정보</div>
+      ${parkingDiffBadge(spot.parking.difficulty)}
+      <div style="margin-top:4px">${mapLinkHtml(spot.parking.mapUrl, spot.parking.name, 15)}</div>
+      <div class="info-item" style="margin-top:2px">💴 ${spot.parking.fee}</div>
+    </div>` : '';
+
+  return `<div class="spot-card">
+    ${mapLinkHtml(spot.mapUrl, spot.name)}
+    ${ratingHtml}
+    ${priceHtml}
+    <div class="info-list">${feeHtml}${hoursHtml}${tipsHtml}</div>
+    ${badgesHtml ? `<div class="badge-row">${badgesHtml}</div>` : ''}
+    ${parkingHtml}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  슬라이드 타입별 렌더
+// ═══════════════════════════════════════════════
+function renderSlide(slide, isMallorca) {
+  // 개요
+  if (slide.type === 'overview') {
+    const statsHtml = slide.stats.map(s => `
+      <div class="overview-stat"><div class="val">${s.val}</div><div class="lbl">${s.lbl}</div></div>
+    `).join('');
+
+    let hotelHtml = '';
+    if (slide.hotel) {
+      hotelHtml = `<div class="spot-card">
+        <div style="font-size:13px;font-weight:600;color:var(--city-sub,var(--text-sub));margin-bottom:6px">🏨 숙소</div>
+        ${mapLinkHtml(slide.hotel.mapUrl, slide.hotel.name + ' ' + slide.hotel.nameNote, 16)}
+        <div class="rating-row">⭐ <span class="rating-val">${slide.hotel.rating}</span> (${slide.hotel.reviews}건)</div>
+        <div class="info-list"><div class="info-item">• ${slide.hotel.note}</div></div>
+      </div>`;
+    } else if (slide.hotels) {
+      hotelHtml = slide.hotels.map(h => `<div class="spot-card">
+        <div style="font-size:13px;font-weight:600;color:var(--text-sub);margin-bottom:6px">🏨 숙소 ${h.nameNote}</div>
+        ${mapLinkHtml(h.mapUrl, h.name, 16)}
+        <div class="rating-row">⭐ <span class="rating-val">${h.rating}</span> (${h.reviews}건)</div>
+        <div class="info-list"><div class="info-item">• ${h.note}</div></div>
+      </div>`).join('');
+    }
+
+    return `<div class="slide-header">
+      <div class="overview-hero">
+        <div class="overview-city">${slide.city}</div>
+        <div class="overview-sub">${slide.subtitle}</div>
+        <div style="font-size:13px;opacity:0.8;margin-top:4px">🧭 ${slide.theme}</div>
+        <div style="font-size:13px;opacity:0.8;margin-top:2px">🚌 ${slide.transport}</div>
+        <div class="overview-stat-row">${statsHtml}</div>
+      </div>
+    </div>
+    ${hotelHtml}`;
+  }
+
+  // 식당 총정리
+  if (slide.type === 'restaurant-summary') {
+    const cards = slide.restaurants.map(r => {
+      const allergy = isMallorca && r.allergyBadge
+        ? (r.allergyBadge === '최적' ? `<span class="badge badge-allergy-ok" style="margin-left:4px">✅</span>` : `<span class="badge badge-allergy-warn" style="margin-left:4px">⚠️</span>`)
+        : '';
+      return `<div class="rest-card">
+        <div class="rest-day-tag">${r.day}</div>
+        ${mapLinkHtml(r.mapUrl, r.name, 16)}
+        <div class="rating-row" style="margin-top:4px">
+          ⭐ <span class="rating-val">${r.rating}</span> (${r.reviews}건)
+          <span style="margin-left:auto">💰 ${r.price}</span>
+          ${allergy}
+        </div>
+        <div class="badge-row" style="margin-top:8px">${resBadgeHtml(r.reservation)}</div>
+      </div>`;
+    }).join('');
+    return `<div class="slide-header">
+      <div class="slide-title">식당 총정리</div>
+    </div>${cards}`;
+  }
+
+  // 실용정보 — info 타입
+  if (slide.type === 'info') {
+    const sectionsHtml = slide.sections.map(sec => {
+      const thCells = sec.cols.map(c => `<th>${c}</th>`).join('');
+      const rows = sec.rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
+      return `<div style="margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">${sec.heading}</div>
+        <table class="info-table"><thead><tr>${thCells}</tr></thead><tbody>${rows}</tbody></table>
+      </div>`;
+    }).join('');
+
+    return `<div class="slide-header">
+      <div class="slide-title">${slide.title}</div>
+    </div>${sectionsHtml}`;
+  }
+
+  // 실용정보 — tips 타입
+  if (slide.type === 'tips') {
+    const tipsHtml = slide.tips.map(t => `
+      <div class="tip-card">
+        <div class="tip-title">${t.title}</div>
+        <div class="tip-body">${t.body}</div>
+      </div>`).join('');
+    return `<div class="slide-header"><div class="slide-title">${slide.title}</div></div>${tipsHtml}`;
+  }
+
+  // 실용정보 — allergy 타입
+  if (slide.type === 'allergy') {
+    const cardsHtml = slide.phrases.map(p => `
+      <div class="allergy-card" onclick="copyAllergy('${p.es.replace(/'/g, "\\'")}')">
+        <div class="allergy-es">${p.es}</div>
+        <div class="allergy-ko">${p.ko}</div>
+        <div class="allergy-phonetic">${p.phonetic}</div>
+        <div class="allergy-copy-hint">📋 탭하면 클립보드 복사</div>
+      </div>`).join('');
+    return `<div class="slide-header">
+      <div class="slide-title">${slide.title}</div>
+      <div class="info-item" style="margin-top:4px">카드를 탭하면 스페인어 문장이 복사됩니다.</div>
+    </div>${cardsHtml}`;
+  }
+
+  // 일반 슬라이드 (DAY)
+  const labelHtml = (slide.group && slide.time)
+    ? `<div class="slide-day-label">${slide.group} · ${slide.time}</div>`
+    : (slide.group ? `<div class="slide-day-label">${slide.group}</div>` : '');
+
+  const spotsHtml = (slide.spots || []).map(s => spotCardHtml(s, isMallorca)).join('');
+
+  return `<div class="slide-header">
+    ${labelHtml}
+    <div class="slide-title">${slide.title}</div>
+  </div>
+  ${spotsHtml}`;
+}
+
+// ═══════════════════════════════════════════════
+//  DOM 업데이트
+// ═══════════════════════════════════════════════
+function getCurrentSlides() {
+  const city = DATA[currentCity];
+  return city.slides.filter(s => s.group === currentGroup);
+}
+
+function updateCSSVars() {
+  const city = DATA[currentCity];
+  document.documentElement.style.setProperty('--city-main', city.cityMain);
+  document.documentElement.style.setProperty('--city-accent', city.cityAccent);
+}
+
+function renderGroupTabs() {
+  const groups = DATA[currentCity].groups;
+  document.getElementById('grouptab').innerHTML = groups.map(g =>
+    `<button class="group-btn${g === currentGroup ? ' active' : ''}" onclick="switchGroup('${g}')">${g}</button>`
+  ).join('');
+}
+
+function renderSlides() {
+  const slides = getCurrentSlides();
+  const isMallorca = currentCity === 'mallorca';
+  const track = document.getElementById('slide-track');
+  track.innerHTML = slides.map(s =>
+    `<div class="slide">${renderSlide(s, isMallorca)}</div>`
+  ).join('');
+  track.style.transition = 'none';
+  track.style.transform = `translateX(${-currentSlideIndex * 100}%)`;
+}
+
+function renderDots() {
+  const count = getCurrentSlides().length;
+  document.getElementById('dotbar').innerHTML = Array.from({ length: count }, (_, i) =>
+    `<div class="dot${i === currentSlideIndex ? ' active' : ''}"></div>`
+  ).join('');
+}
+
+function goToSlide(idx, animate = true) {
+  const count = getCurrentSlides().length;
+  currentSlideIndex = Math.max(0, Math.min(count - 1, idx));
+  const track = document.getElementById('slide-track');
+  if (animate) {
+    track.style.transition = 'transform 0.3s ease';
+  }
+  track.style.transform = `translateX(${-currentSlideIndex * 100}%)`;
+  renderDots();
+
+  // 그룹 탭 스크롤
+  const activeDot = document.querySelector('.group-btn.active');
+  if (activeDot) activeDot.scrollIntoView({ inline: 'center', behavior: 'smooth' });
+}
+
+function fullRender() {
+  updateCSSVars();
+  renderGroupTabs();
+  renderSlides();
+  renderDots();
+
+  // 탭 버튼 활성화
+  document.getElementById('tab-bcn').classList.toggle('active', currentCity === 'barcelona');
+  document.getElementById('tab-mlc').classList.toggle('active', currentCity === 'mallorca');
+}
+
+// ═══════════════════════════════════════════════
+//  이벤트 핸들러
+// ═══════════════════════════════════════════════
+function switchCity(city) {
+  if (city === currentCity) return;
+  currentCity = city;
+  currentGroup = '개요';
+  currentSlideIndex = 0;
+  fullRender();
+}
+
+function switchGroup(group) {
+  if (group === currentGroup) return;
+  currentGroup = group;
+  currentSlideIndex = 0;
+  renderGroupTabs();
+  renderSlides();
+  renderDots();
+}
+
+function onTouchStart(e) {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  isDragging = false;
+}
+
+function onTouchMove(e) {
+  const dx = e.touches[0].clientX - touchStartX;
+  const dy = e.touches[0].clientY - touchStartY;
+  if (!isDragging && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
+    isDragging = true;
+  }
+  if (isDragging) e.preventDefault();
+}
+
+function onTouchEnd(e) {
+  if (!isDragging) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 40) {
+    dx < 0 ? goToSlide(currentSlideIndex + 1) : goToSlide(currentSlideIndex - 1);
+  }
+  isDragging = false;
+}
+
+// ═══════════════════════════════════════════════
+//  새우 알러지 복사 + 토스트
+// ═══════════════════════════════════════════════
+function copyAllergy(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast('📋 복사했어요: ' + text));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); showToast('📋 복사했어요!'); } catch (e) { showToast('복사 실패 — 수동으로 선택하세요'); }
+    document.body.removeChild(ta);
+  }
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ═══════════════════════════════════════════════
+//  초기화
+// ═══════════════════════════════════════════════
+fullRender();
+</script>
+</body>
+</html>
